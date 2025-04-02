@@ -38,9 +38,9 @@ df = pd.read_csv("ufc_fights_sample.csv")
 
 ```
 UFC-Fight-analysis/
+├── README.md               # Project overview
 ├── model/                  # Trained models (empty by default)
 ├── requirements.txt        # Python dependencies
-├── README.md               # Project overview
 ├── ufc_fights_sample.csv   # Sample UFC dataset
 ```
 
