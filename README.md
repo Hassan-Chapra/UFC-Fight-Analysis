@@ -47,3 +47,5 @@ UFC-Fight-analysis/
 ## 📄 License
 
 Open-source and free to use for learning, experimentation, and further development.
+
+Built with ❤️ by The IE Sport Analytic Club for MMA fans and data nerds.
