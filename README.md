@@ -1,4 +1,4 @@
-# 🥋 UFC Fight Predictor (Standalone CLI Tool)
+# 🥋 UFC Fight Predictor 🚀
 
 This project predicts the outcome of a UFC fight based on fighter statistics using a trained machine learning model. It's a self-contained Python script — no web app, no API, just a command-line experience powered by real fight data.
 
@@ -34,8 +34,8 @@ python ufc_predictor_combined.py
 
 If a model isn’t found, it will automatically train one using `ufc_data.csv`.
 
-## ⚙️ Example Inputs
 
+## ⚙️ Example Inputs
 - Strikes Landed per Minute: 4.2  
 - Striking Accuracy (%): 52  
 - Submission Attempts per Fight: 0.6  
@@ -44,10 +44,11 @@ If a model isn’t found, it will automatically train one using `ufc_data.csv`.
 - Age: 30
 
 ## 📝 Notes
-
 - This tool is fully offline and runs in the terminal.
 - Model and scaler are saved inside the script as a single object when trained.
 
 ## 📄 License
 
 Free to use for educational, experimental, and nerdy combat sports purposes.
+
+Created with ❤️ by IE Sports Analytics for MMA fans and data geeks 
