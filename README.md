@@ -35,8 +35,6 @@ streamlit run app/app.py
 UFC-Fight-Predictor/
 ├── data/                  # Sample datasets
 ├── model/                 # Trained model file
-├── src/                   # Python scripts (preprocess, train, predict)
-├── app/                   # Streamlit interface
 ├── README.md              # Project documentation
 └── requirements.txt       # Dependencies
 ```
