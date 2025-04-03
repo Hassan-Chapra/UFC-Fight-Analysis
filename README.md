@@ -80,4 +80,4 @@ This interactive UFC fight prediction game uses machine learning to simulate fig
 
 Free to use for educational, experimental, and MMA-loving purposes.
 
-Created with ❤️ by IE Sports Analytics
+Created with ❤️ by IE Sports Analytics.
