@@ -1,15 +1,14 @@
-# ufc_predictor_combined.py
-
+import pandas as pd
 import numpy as np
-import joblib
-import os
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
-import pandas as pd
+import tkinter as tk
+from tkinter import messagebox
+import random
 
 class UFCFightModel:
-    def __init__(self, model=None, scaler=None):
+    def __init__(self, model, scaler):
         self.model = model
         self.scaler = scaler
 
@@ -19,6 +18,7 @@ class UFCFightModel:
                 f['SLpM'], f['StrAcc'], f['SubAtt'],
                 f['TDLanded'], f['TDAcc'], f['Age']
             ])
+
         A = extract_features(fighter_A)
         B = extract_features(fighter_B)
         diff = A - B
@@ -30,77 +30,109 @@ class UFCFightModel:
             "Victory Method": "Decision" if max(prob) < 0.7 else "KO/Sub"
         }
 
-def train_and_save_model():
-    df = pd.read_csv("data/data.csv")
-    df = df[df["Winner"].isin(["Red", "Blue"])].copy()
+# Load sample data
+df = pd.read_csv("ufc_fights_sample.csv")
+df = df.dropna(subset=[
+    'A_SLpM', 'A_StrAcc', 'A_SubAtt', 'A_TDAtt', 'A_TDAcc', 'A_Age',
+    'B_SLpM', 'B_StrAcc', 'B_SubAtt', 'B_TDAtt', 'B_TDAcc', 'B_Age', 'Winner', 'Fighter_A', 'Fighter_B'
+])
+df['Winner'] = df['Winner'].map({'A': 1, 'B': 0})
 
-    features = [
-        'R_avg_SIG_STR_landed', 'R_avg_SIG_STR_pct', 'R_avg_SUB_ATT',
-        'R_avg_TD_landed', 'R_avg_TD_pct',
-        'B_avg_SIG_STR_landed', 'B_avg_SIG_STR_pct', 'B_avg_SUB_ATT',
-        'B_avg_TD_landed', 'B_avg_TD_pct',
-        'R_age', 'B_age'
-    ]
-    df = df.dropna(subset=features)
-    df['Winner'] = df['Winner'].map({'Red': 1, 'Blue': 0})
+X = []
+y = []
+for _, row in df.iterrows():
+    A = [row['A_SLpM'], row['A_StrAcc'], row['A_SubAtt'], row['A_TDAtt'], row['A_TDAcc'], row['A_Age']]
+    B = [row['B_SLpM'], row['B_StrAcc'], row['B_SubAtt'], row['B_TDAtt'], row['B_TDAcc'], row['B_Age']]
+    X.append(np.array(A) - np.array(B))
+    y.append(row['Winner'])
 
-    X = []
-    for _, row in df.iterrows():
-        r = [row[f] for f in features[:6]]
-        b = [row[f] for f in features[6:]]
-        X.append(np.array(r) - np.array(b))
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_scaled, y)
+train_model = UFCFightModel(model, scaler)
 
-    X = np.array(X)
-    y = df['Winner'].values
+# Tkinter GUI
+def show_fight():
+    global current_row, fighter_A, fighter_B
+    current_row = df.sample(1).iloc[0]
 
-    X_train, _, y_train, _ = train_test_split(X, y, test_size=0.2, random_state=42)
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
+    fighter_A = {
+        'SLpM': current_row['A_SLpM'],
+        'StrAcc': current_row['A_StrAcc'],
+        'SubAtt': current_row['A_SubAtt'],
+        'TDLanded': current_row['A_TDAtt'],
+        'TDAcc': current_row['A_TDAcc'],
+        'Age': current_row['A_Age']
+    }
+    fighter_B = {
+        'SLpM': current_row['B_SLpM'],
+        'StrAcc': current_row['B_StrAcc'],
+        'SubAtt': current_row['B_SubAtt'],
+        'TDLanded': current_row['B_TDAtt'],
+        'TDAcc': current_row['B_TDAcc'],
+        'Age': current_row['B_Age']
+    }
 
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
-    model.fit(X_train_scaled, y_train)
+    info_A = f"Fighter A\n" + "\n".join([f"{k}: {v}" for k, v in fighter_A.items()])
+    info_B = f"Fighter B\n" + "\n".join([f"{k}: {v}" for k, v in fighter_B.items()])
 
-    combined_model = UFCFightModel(model, scaler)
-    joblib.dump(combined_model, "model/ufc_model_single.pkl")
+    label_A.config(text=info_A)
+    label_B.config(text=info_B)
+    name_label.config(text="")
 
-def main():
-    if not os.path.exists("model/ufc_model_single.pkl"):
-        os.makedirs("model", exist_ok=True)
-        print("Training model from data...")
-        train_and_save_model()
 
-    model = joblib.load("model/ufc_model_single.pkl")
+def make_choice(user_pick):
+    prediction = train_model.predict(fighter_A, fighter_B)
+    actual_winner = "Fighter A" if current_row['Winner'] == 1 else "Fighter B"
+    actual_name = current_row['Fighter_A'] if actual_winner == "Fighter A" else current_row['Fighter_B']
+    your_name = current_row['Fighter_A'] if user_pick == "Fighter A" else current_row['Fighter_B']
 
-    print("🥋 UFC Fight IQ Challenge
-")
-    print("Enter stats for each fighter below.
-")
+    result = f"Your Pick: {user_pick} ({your_name})\nModel Prediction: {prediction['Winner']}\nActual Winner: {actual_winner} ({actual_name})\nWin Probability: {prediction['Win Probability']}\nVictory Method: {prediction['Victory Method']}"
+    if user_pick == actual_winner:
+        result += "\n\n🎉 Well done! You guessed it right."
+    name_label.config(text=f"Fighter A: {current_row['Fighter_A']}    |    Fighter B: {current_row['Fighter_B']}")
+    messagebox.showinfo("Fight Result", result)
+    show_fight()
 
-    def get_input(name):
-        print(f"--- {name} ---")
-        return {
-            'SLpM': float(input("Strikes Landed per Minute: ")),
-            'StrAcc': float(input("Striking Accuracy (%): ")),
-            'SubAtt': float(input("Submission Attempts per Fight: ")),
-            'TDLanded': float(input("Takedowns Landed per Fight: ")),
-            'TDAcc': float(input("Takedown Accuracy (%): ")),
-            'Age': float(input("Age: "))
-        }
+# GUI setup
+root = tk.Tk()
+root.title("🥋 UFC Fight Predictor")
 
-    fighter_A = get_input("Fighter A")
-    print()
-    fighter_B = get_input("Fighter B")
+explanation = (
+    "\nTerm Guide:\n"
+    "SLpM: Strikes Landed per Minute\n"
+    "StrAcc: Striking Accuracy (%)\n"
+    "SubAtt: Submission Attempts per Fight\n"
+    "TDLanded: Takedowns Attempted\n"
+    "TDAcc: Takedown Accuracy (%)\n"
+    "Age: Fighter's age\n"
+)
 
-    result = model.predict(fighter_A, fighter_B)
-    print("\n=== Prediction Result ===")
-    print(f"Winner: {result['Winner']}")
-    print(f"Win Probability: {result['Win Probability']}")
-    print(f"Victory Method: {result['Victory Method']}")
-    print("=========================")
+tk.Label(root, text="Choose the winner based on the stats below:", font=("Arial", 14)).pack(pady=10)
+tk.Label(root, text=explanation, font=("Courier", 10), justify="left").pack()
 
-# Create a ready-to-use model object so other scripts can import it
-if __name__ != "__main__":
-    if not os.path.exists("model/ufc_model_single.pkl"):
-        os.makedirs("model", exist_ok=True)
-        train_and_save_model()
-    train_model = joblib.load("model/ufc_model_single.pkl")
+frame = tk.Frame(root)
+frame.pack(pady=10)
+
+label_A = tk.Label(frame, text="", justify="left", font=("Courier", 10))
+label_A.grid(row=0, column=0, padx=20)
+label_B = tk.Label(frame, text="", justify="left", font=("Courier", 10))
+label_B.grid(row=0, column=1, padx=20)
+
+btn_frame = tk.Frame(root)
+btn_frame.pack(pady=10)
+
+btn_A = tk.Button(btn_frame, text="Pick Fighter A", command=lambda: make_choice("Fighter A"), width=20)
+btn_A.grid(row=0, column=0, padx=10)
+btn_B = tk.Button(btn_frame, text="Pick Fighter B", command=lambda: make_choice("Fighter B"), width=20)
+btn_B.grid(row=0, column=1, padx=10)
+
+name_label = tk.Label(root, text="", font=("Arial", 12), fg="blue")
+name_label.pack(pady=5)
+
+next_btn = tk.Button(root, text="Next Fight", command=show_fight, width=20)
+next_btn.pack(pady=10)
+
+show_fight()
+root.mainloop()
