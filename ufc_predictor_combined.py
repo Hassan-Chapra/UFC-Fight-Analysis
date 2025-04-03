@@ -52,6 +52,10 @@ model = RandomForestClassifier(n_estimators=100, random_state=42)
 model.fit(X_scaled, y)
 train_model = UFCFightModel(model, scaler)
 
+# Score tracking
+fight_count = 0
+correct_guesses = 0
+
 # Tkinter GUI
 def show_fight():
     global current_row, fighter_A, fighter_B
@@ -83,17 +87,33 @@ def show_fight():
 
 
 def make_choice(user_pick):
+    global fight_count, correct_guesses
     prediction = train_model.predict(fighter_A, fighter_B)
     actual_winner = "Fighter A" if current_row['Winner'] == 1 else "Fighter B"
     actual_name = current_row['Fighter_A'] if actual_winner == "Fighter A" else current_row['Fighter_B']
     your_name = current_row['Fighter_A'] if user_pick == "Fighter A" else current_row['Fighter_B']
 
+    correct = user_pick == actual_winner
+    if correct:
+        correct_guesses += 1
+
+    fight_count += 1
+
     result = f"Your Pick: {user_pick} ({your_name})\nModel Prediction: {prediction['Winner']}\nActual Winner: {actual_winner} ({actual_name})\nWin Probability: {prediction['Win Probability']}\nVictory Method: {prediction['Victory Method']}"
-    if user_pick == actual_winner:
+    if correct:
         result += "\n\n🎉 Well done! You guessed it right."
+    else:
+        result += "\n\n❌ Better luck next time."
+
     name_label.config(text=f"Fighter A: {current_row['Fighter_A']}    |    Fighter B: {current_row['Fighter_B']}")
-    messagebox.showinfo("Fight Result", result)
-    show_fight()
+
+    if fight_count >= 3:
+        result += f"\n\n✅ You got {correct_guesses} out of 3 correct."
+        messagebox.showinfo("Final Score", result)
+        root.quit()
+    else:
+        messagebox.showinfo("Fight Result", result)
+        show_fight()
 
 # GUI setup
 root = tk.Tk()
@@ -130,9 +150,6 @@ btn_B.grid(row=0, column=1, padx=10)
 
 name_label = tk.Label(root, text="", font=("Arial", 12), fg="blue")
 name_label.pack(pady=5)
-
-next_btn = tk.Button(root, text="Next Fight", command=show_fight, width=20)
-next_btn.pack(pady=10)
 
 show_fight()
 root.mainloop()
