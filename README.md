@@ -1,6 +1,6 @@
 🥋 UFC Fight Predictor Booth Edition 🚀
 
-This interactive UFC fight prediction game uses machine learning to simulate fight outcomes based on real-world fighter stats. Designed for booths or demo setups (or fun), it challenges users to predict winners based on performance data — then compares their guess to the model and actual result.
+This interactive UFC fight prediction game uses machine learning to simulate fight outcomes based on real-world fighter stats. Designed for booths or demo setups (or for fun), it challenges users to predict winners based on performance data — then compares their guess to the model and actual result.
 
 ---
 
