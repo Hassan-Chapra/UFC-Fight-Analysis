@@ -1,54 +1,77 @@
-# 🥋 UFC Fight Predictor 🚀
+🥋 UFC Fight Predictor Booth Edition 🚀
 
-This project predicts the outcome of a UFC fight based on fighter statistics using a trained machine learning model. It's a self-contained Python script — no web app, no API, just a command-line experience powered by real fight data.
+This interactive UFC fight prediction game uses machine learning to simulate fight outcomes based on real-world fighter stats. Designed for booths or demo setups, it challenges users to predict winners based on performance data — then compares their guess to the model and actual result.
 
-## 📁 Files Included
+---
 
-- `ufc_predictor_combined.py` – All-in-one script (model training, prediction, CLI interface)
+📁 Files Included
+
+- `ufc_predictor_combined.py` – Terminal-based all-in-one script
+- `ufc_fight_interface.py` – GUI version for live demos (booth use)
 - `ufc_data.csv` – Full dataset for training the model
-- `ufc_fights_sample.csv` – Small sample dataset for quick demos or testing
-- `requirements.txt` – List of Python dependencies
+- `ufc_fights_sample.csv` – Sample fights used in the GUI
+- `requirements.txt` – Python dependencies list
 
-## 🧠 What It Does
+---
 
-- Trains a machine learning model on UFC fight stats (if no model exists)
-- Accepts fighter input (SLpM, accuracy, takedowns, age, etc.)
+🧠 What It Does
+
+- Trains a machine learning model using UFC fight statistics
 - Predicts:
   - 🏆 Winner
   - 📊 Win probability
   - 🥋 Method of victory (Decision or KO/Sub)
+- In the GUI version:
+  - Hides fighter names to reduce bias
+  - Tracks user score out of 5 fights
+  - 🎉 Celebrates perfect scores
+  - 🏆 Announces new high scores (except for the first user)
 
-## 🚀 How to Use
+---
 
-1. **Install requirements**  
-```bash
-pip install -r requirements.txt
-```
+🚀 How to Use
 
-2. **Run the script**  
-```bash
-python ufc_predictor_combined.py
-```
+🖥️ GUI Mode (Booth Edition)
 
-3. **Enter fighter stats when prompted**
+1. Install dependencies
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-If a model isn’t found, it will automatically train one using `ufc_data.csv`.
+2. Launch the GUI
+   ```bash
+   python ufc_fight_interface.py
+   ```
 
+3. Play!
+   - Enter your name
+   - Pick winners based on stats
+   - See if you can out-predict the model
 
-## ⚙️ Example Inputs
-- Strikes Landed per Minute: 4.2  
-- Striking Accuracy (%): 52  
-- Submission Attempts per Fight: 0.6  
-- Takedowns Landed per Fight: 1.8  
-- Takedown Accuracy (%): 48  
-- Age: 30
+---
 
-## 📝 Notes
-- This tool is fully offline and runs in the terminal.
-- Model and scaler are saved inside the script as a single object when trained.
+⚙️ Stats Used for Prediction
 
-## 📄 License
+- SLpM – Strikes Landed per Minute  
+- StrAcc – Striking Accuracy (%)  
+- SubAtt – Submission Attempts  
+- TDLanded – Takedowns Attempted  
+- TDAcc – Takedown Accuracy (%)  
+- Age – Fighter age at the time of the bout
 
-Free to use for educational, experimental, and nerdy combat sports purposes.
+---
 
-Created with ❤️ by IE Sports Analytics for MMA fans and data geeks 
+📝 Notes
+
+- Fully offline, no internet or API required
+- GUI built with Tkinter (easy to run on any Python setup)
+- Backend powered by Random Forest (via scikit-learn)
+- Unique fights per session (no repeats in 5-round runs)
+
+---
+
+📄 License
+
+Free to use for educational, experimental, and MMA-loving purposes.
+
+Created with ❤️ by IE Sports Analytics for MMA fans and Data nerds
