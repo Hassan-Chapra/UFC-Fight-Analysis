@@ -1,0 +1,6 @@
+Fighter_A,Fighter_B,A_SLpM,A_SApM,A_StrAcc,A_StrDef,A_TDAcc,A_TDDef,A_SubAtt,A_TDAtt,A_Age,A_Time,B_SLpM,B_SApM,B_StrAcc,B_StrDef,B_TDAcc,B_TDDef,B_SubAtt,B_TDAtt,B_Age,B_Time,Winner
+Jon Jones,Ciryl Gane,4.3,2.0,55,65,48,80,0.4,2.0,35,15.0,3.6,2.5,60,58,30,65,0.2,1.5,32,13.0,A
+Islam Makhachev,Alexander Volkanovski,2.2,1.2,57,60,65,90,0.8,3.0,32,12.0,4.5,3.2,56,62,40,75,0.3,2.5,35,14.5,A
+Kamaru Usman,Leon Edwards,4.6,2.2,53,60,45,85,0.2,2.5,36,17.0,2.9,2.5,49,61,38,70,0.4,2.0,33,16.0,B
+Dustin Poirier,Justin Gaethje,5.6,3.9,51,56,33,61,1.1,1.5,34,15.0,7.5,4.8,59,54,20,70,0.3,1.0,35,13.0,B
+Jon Jones,Dominick Reyes,3.3,2.2,48,63,55,73,0.6,2.0,35,17.0,4.4,3.0,50,60,47,75,0.8,2.5,36,16.0,A
