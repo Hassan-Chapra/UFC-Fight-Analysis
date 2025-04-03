@@ -98,5 +98,9 @@ def main():
     print(f"Victory Method: {result['Victory Method']}")
     print("=========================")
 
-if __name__ == "__main__":
-    main()
+# Create a ready-to-use model object so other scripts can import it
+if __name__ != "__main__":
+    if not os.path.exists("model/ufc_model_single.pkl"):
+        os.makedirs("model", exist_ok=True)
+        train_and_save_model()
+    train_model = joblib.load("model/ufc_model_single.pkl")
