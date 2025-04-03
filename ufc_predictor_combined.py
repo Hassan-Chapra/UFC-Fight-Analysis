@@ -4,7 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, simpledialog
 import random
 
 class UFCFightModel:
@@ -34,7 +34,7 @@ class UFCFightModel:
 df = pd.read_csv("ufc_fights_sample.csv")
 df = df.dropna(subset=[
     'A_SLpM', 'A_StrAcc', 'A_SubAtt', 'A_TDAtt', 'A_TDAcc', 'A_Age',
-    'B_SLpM', 'B_StrAcc', 'B_SubAtt', 'B_TDAtt', 'B_TDAcc', 'B_Age', 'Winner', 'Fighter_A', 'Fighter_B'
+    'B_SLpM', 'B_StrAcc', 'B_SubAtt', 'B_TDAtt', 'B_TDAcc', 'B_Age', 'Winner', 'Fighter_A', 'Fighter_B', 'Event'
 ])
 df['Winner'] = df['Winner'].map({'A': 1, 'B': 0})
 
@@ -52,14 +52,21 @@ model = RandomForestClassifier(n_estimators=100, random_state=42)
 model.fit(X_scaled, y)
 train_model = UFCFightModel(model, scaler)
 
-# Score tracking
+# Game state
 fight_count = 0
-correct_guesses = 0
+correct_count = 0
+highest_score = -1
+first_user = True
+player_name = ""
+unused_fights = df.sample(frac=1).to_dict('records')
 
 # Tkinter GUI
 def show_fight():
-    global current_row, fighter_A, fighter_B
-    current_row = df.sample(1).iloc[0]
+    global current_row, fighter_A, fighter_B, unused_fights
+    if not unused_fights:
+        unused_fights = df.sample(frac=1).to_dict('records')
+
+    current_row = unused_fights.pop(0)
 
     fighter_A = {
         'SLpM': current_row['A_SLpM'],
@@ -84,39 +91,73 @@ def show_fight():
     label_A.config(text=info_A)
     label_B.config(text=info_B)
     name_label.config(text="")
+    btn_A.config(state="normal")
+    btn_B.config(state="normal")
+    next_btn.config(state="disabled")
 
 
 def make_choice(user_pick):
-    global fight_count, correct_guesses
+    global fight_count, correct_count, highest_score, player_name, first_user
     prediction = train_model.predict(fighter_A, fighter_B)
     actual_winner = "Fighter A" if current_row['Winner'] == 1 else "Fighter B"
     actual_name = current_row['Fighter_A'] if actual_winner == "Fighter A" else current_row['Fighter_B']
     your_name = current_row['Fighter_A'] if user_pick == "Fighter A" else current_row['Fighter_B']
-
-    correct = user_pick == actual_winner
-    if correct:
-        correct_guesses += 1
+    event_name = current_row.get('Event', 'Unknown Event')
 
     fight_count += 1
+    if user_pick == actual_winner:
+        correct_count += 1
 
-    result = f"Your Pick: {user_pick} ({your_name})\nModel Prediction: {prediction['Winner']}\nActual Winner: {actual_winner} ({actual_name})\nWin Probability: {prediction['Win Probability']}\nVictory Method: {prediction['Victory Method']}"
-    if correct:
-        result += "\n\n🎉 Well done! You guessed it right."
-    else:
-        result += "\n\n❌ Better luck next time."
+    result = (
+        f"Event: {event_name}\n\n"
+        f"Your Pick: {user_pick} ({your_name})\n\n"
+        f"Model Prediction: {prediction['Winner']}\n\n"
+        f"Actual Winner: {actual_winner} ({actual_name})\n\n"
+        f"Win Probability: {prediction['Win Probability']}\n\n"
+        f"Victory Method: {prediction['Victory Method']}\n\n"
+    )
+
+    if user_pick == actual_winner:
+        result += "🎉 Well done! You guessed it right.\n\n"
+
+    result += f"Fights Completed: {fight_count}/5"
 
     name_label.config(text=f"Fighter A: {current_row['Fighter_A']}    |    Fighter B: {current_row['Fighter_B']}")
+    messagebox.showinfo("Fight Result", result)
 
-    if fight_count >= 3:
-        result += f"\n\n✅ You got {correct_guesses} out of 3 correct."
-        messagebox.showinfo("Final Score", result)
-        root.quit()
-    else:
-        messagebox.showinfo("Fight Result", result)
+    btn_A.config(state="disabled")
+    btn_B.config(state="disabled")
+    next_btn.config(state="normal")
+
+    if fight_count == 5:
+        final_msg = f"{player_name}, you got {correct_count} out of 5 fights right!\n"
+        final_msg += f"Current High Score: {highest_score}/5"
+        if correct_count == 5:
+            final_msg += "\n\n🔥 Perfect Score! You're a UFC genius!"
+        elif not first_user and correct_count > highest_score:
+            final_msg += "\n\n🏆 New Record!"
+
+        if correct_count > highest_score:
+            highest_score = correct_count
+
+        messagebox.showinfo("Game Over", final_msg)
+        fight_count = 0
+        correct_count = 0
+        first_user = False
+        player_name_prompt()
         show_fight()
+
+def player_name_prompt():
+    global player_name
+    player_name = simpledialog.askstring("Welcome", "Enter your name:")
+    if not player_name:
+        player_name = "Anonymous"
 
 # GUI setup
 root = tk.Tk()
+root.withdraw()
+player_name_prompt()
+root.deiconify()
 root.title("🥋 UFC Fight Predictor")
 
 explanation = (
@@ -150,6 +191,9 @@ btn_B.grid(row=0, column=1, padx=10)
 
 name_label = tk.Label(root, text="", font=("Arial", 12), fg="blue")
 name_label.pack(pady=5)
+
+next_btn = tk.Button(root, text="Next Fight", command=show_fight, width=20, state="disabled")
+next_btn.pack(pady=10)
 
 show_fight()
 root.mainloop()
